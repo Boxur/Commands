@@ -12,7 +12,6 @@ int main()
 					std::cout << "pong\n";
         };
 
-    // Command 2: "set mode auto" (recursive predefined arguments)
     console["set"]["mode"]["automat"].function =
         [&](const std::vector<std::string>&)
         {
@@ -30,7 +29,6 @@ int main()
 				{
 					console.stop = true;
 				};
-		std::cout<<"-"<<(console["set"].function==nullptr)<<"-"<<std::endl;
 	runConsole(console);
 	
 }
