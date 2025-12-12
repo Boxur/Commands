@@ -11,15 +11,15 @@
 
 struct Node
 {
-	std::unordered_map<std::string,std::unique_ptr<Node>> children;
+	std::unordered_map<std::string,std::shared_ptr<Node>> children;
 	std::function<void(const std::vector<std::string>&)> function = nullptr;
 
 	Node& operator[](const std::string& key)
 	{
-		std::unique_ptr<Node>& ret = children[key];
+		std::shared_ptr<Node>& ret = children[key];
 
 		if(!ret)
-			ret = std::make_unique<Node>();
+			ret = std::make_shared<Node>();
 
 		return *ret;
 	}
@@ -27,7 +27,7 @@ struct Node
 
 struct Console
 {
-	std::unordered_map<std::string,std::unique_ptr<Node>> nodes;
+	std::unordered_map<std::string,std::shared_ptr<Node>> nodes;
 	bool stop = false;
 	std::string buf= "";
 	std::deque<std::string> hist;
@@ -40,10 +40,10 @@ struct Console
 
 	Node& operator[](const std::string& key)
 	{
-		std::unique_ptr<Node>& ret = nodes[key];
+		std::shared_ptr<Node>& ret = nodes[key];
 
 		if(!ret)
-			ret = std::make_unique<Node>();
+			ret = std::make_shared<Node>();
 
 		return *ret;
 	}
@@ -186,6 +186,39 @@ void autoComplete(Console& console)
 	}
 }
 
+void executeCommand(Console& console)
+{
+	std::istringstream ss(console.buf);
+	std::vector<std::string> values;
+	std::string value;
+	while(getline(ss,value,' '))
+	{
+		if(value.size()>0)
+			values.push_back(value);
+	}
+	console.buf = "";
+	if(values.size()<1)
+		return;
+	if(console.nodes.find(values[0])==console.nodes.end())
+	{
+		write(STDIN_FILENO, "\r\nUnknown command: ",19);
+		write(STDIN_FILENO, values[0].c_str(),values[0].size());
+		return;
+	}
+	std::shared_ptr<Node> node = console.nodes[values[0]];
+	for(int i=1;i<values.size()&&node->function==nullptr;i++)
+	{
+		if(node->children.find(values[i])==node->children.end())
+		{
+			write(STDIN_FILENO,"\r\nIncorrect command usage",26);
+			return;
+		}
+		node = node->children[values[i]];
+	}
+
+	console.buf ="";
+}
+
 int handleInput(char ch,Console& console)
 {
 	std::string s;
@@ -206,8 +239,7 @@ int handleInput(char ch,Console& console)
 			autoComplete(console);
 			break;
 		case 10:			
-			//executeCommand();
-			console.buf="";
+			executeCommand(console);
 			write(STDIN_FILENO,"\r\n>",3);
 			
 			break;
@@ -219,7 +251,7 @@ int handleInput(char ch,Console& console)
 	return 0;
 }
 
-bool verifiHelper(const std::unique_ptr<Node>& node)
+bool verifiHelper(const std::shared_ptr<Node>& node)
 {
 	if(node->function!=nullptr)
 		if(node->children.size()!=0)
