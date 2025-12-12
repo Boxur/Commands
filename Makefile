@@ -13,11 +13,11 @@ INC_DIRS := $(shell find $(INC_DIR) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 $(TARGET_EXEC): $(OBJS)
-	$(CXX) -fsanitize=address -g $(OBJS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: % $(INCLDS)
 	mkdir -p $(dir $@)
-	$(CXX) -fsanitize=address -g $(INC_FLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(INC_FLAGS) $(CXXFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
