@@ -87,6 +87,7 @@ void handleEscapeChar(Console& console)
 {
 	if (!input_available(STDIN_FILENO, 10))
 	{
+		write(STDIN_FILENO,"\r\n",2);
 		console.stop = true;
 		return;
 	}
@@ -199,24 +200,31 @@ void executeCommand(Console& console)
 	console.buf = "";
 	if(values.size()<1)
 		return;
+	write(STDIN_FILENO,"\r\n",2);
 	if(console.nodes.find(values[0])==console.nodes.end())
 	{
-		write(STDIN_FILENO, "\r\nUnknown command: ",19);
+		write(STDIN_FILENO, "Unknown command: \r\n",19);
 		write(STDIN_FILENO, values[0].c_str(),values[0].size());
 		return;
 	}
 	std::shared_ptr<Node> node = console.nodes[values[0]];
-	for(int i=1;i<values.size()&&node->function==nullptr;i++)
+	int i;
+	for(i=1;i<values.size()&&node->function==nullptr;i++)
 	{
 		if(node->children.find(values[i])==node->children.end())
 		{
-			write(STDIN_FILENO,"\r\nIncorrect command usage",26);
+			write(STDIN_FILENO,"Incorrect command usage\r\n",26);
 			return;
 		}
 		node = node->children[values[i]];
 	}
-
-	console.buf ="";
+	if(node->function == nullptr)
+	{
+		write(STDIN_FILENO,"Incorrect command usage\r\n",26);
+		return;
+	}
+	std::vector<std::string> arguments(values.begin()+i,values.end());
+	node->function(arguments);
 }
 
 int handleInput(char ch,Console& console)
@@ -240,7 +248,8 @@ int handleInput(char ch,Console& console)
 			break;
 		case 10:			
 			executeCommand(console);
-			write(STDIN_FILENO,"\r\n>",3);
+			if(!console.stop)
+				write(STDIN_FILENO,">",1);
 			
 			break;
 		default:
@@ -291,4 +300,5 @@ void runConsole(Console& console)
 			if(handleInput(ch.value(),console)==1)
 				break;
 	}
+	setRawMode(false);
 }
