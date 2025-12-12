@@ -4,26 +4,27 @@
 
 int main() 
 {
-		auto echoNode = std::make_unique<Node>();
-    echoNode->function = [](const std::vector<std::string>& args){
-        for (auto& s : args) std::cout << s << " ";
-        std::cout << "\n";
-    };
-		auto echoNode2 = std::make_unique<Node>();
-    echoNode->function = [](const std::vector<std::string>& args){
-        for (auto& s : args) std::cout << s << " ";
-        std::cout << "\n";
-    };
-
-    auto stopNode = std::make_unique<Node>();
-    stopNode->function = [&](const std::vector<std::string>&){
-        std::cout << "Stopping console\n";
-    };
-
     Console console;
-    console.nodes["stop"] = std::move(stopNode);
-    console.nodes["abcdefg"] = std::move(echoNode);
-    console.nodes["abcdfeg"] = std::move(echoNode2);
+
+		console["ping"].function =
+        [&](const std::vector<std::string>&)
+        {
+            std::cout << "pong\n";
+        };
+
+    // Command 2: "set mode auto" (recursive predefined arguments)
+    console["set"]["mode"]["automat"].function =
+        [&](const std::vector<std::string>&)
+        {
+            std::cout << "Mode set to AUTO.\n";
+        };
+
+		console["set"]["mode"]["automobile"].function = 
+				[&](const std::vector<std::string>&)
+				{
+					return;
+				};
+		std::cout<<"-"<<(console["set"].function==nullptr)<<"-"<<std::endl;
 	runConsole(console);
 	
 }

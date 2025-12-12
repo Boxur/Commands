@@ -137,8 +137,10 @@ void autoComplete(Console& console)
 		return;
 	std::string result = "";
 	std::string best="";
+	bool sure;
 	for(int i=0;i<values.size()&&nodes->size() != 0;i++)
 	{
+		sure = true;
 		for(auto& it : *nodes)
 		{
 			if(values[i]!=it.first.substr(0,values[i].size()))
@@ -150,11 +152,18 @@ void autoComplete(Console& console)
 				if(best[j]!=it.first[j])
 				{
 					best = best.substr(0,j);
+					sure = false;
+				}else if(j==it.first.size()-1)
+				{
+					auto s = best.substr(0,j+1);
+					if(s!=best)
+						sure = false;
+					best = s;
 				}
 			}
 		}
 		result += best ;
-		if(nodes->find(best)!=nodes->end())
+		if(sure)
 		{
 			result += " ";
 			nodes = &((*nodes)[best]->children);
@@ -217,7 +226,7 @@ bool verifiHelper(const std::unique_ptr<Node>& node)
 			return false;
 		else
 			return true;
-	if(node->children.size()!=0)
+	if(node->children.size()==0)
 		return false;
 	for(auto& it : node->children)
 		if(verifiHelper(it.second)==false)
@@ -229,7 +238,10 @@ bool verifyConsole(const Console& console)
 {
 	for(auto& it : console.nodes)
 		if(verifiHelper(it.second)==false)
+		{
+			std::cout<<it.first<<std::endl;
 			return false;
+		}
 	return true;
 }
 
