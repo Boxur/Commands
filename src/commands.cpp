@@ -9,20 +9,26 @@ int main()
 		console["ping"].function =
         [&](const std::vector<std::string>&)
         {
-            std::cout << "pong\n";
+					std::cout << "pong\n";
         };
 
     // Command 2: "set mode auto" (recursive predefined arguments)
     console["set"]["mode"]["automat"].function =
         [&](const std::vector<std::string>&)
         {
-            std::cout << "Mode set to AUTO.\n";
+					std::cout << "Mode set to AUTO.\n";
         };
 
 		console["set"]["mode"]["automobile"].function = 
 				[&](const std::vector<std::string>&)
 				{
 					return;
+				};
+
+		console["exit"].function =
+				[&](const std::vector<std::string>&)
+				{
+					console.stop = true;
 				};
 		std::cout<<"-"<<(console["set"].function==nullptr)<<"-"<<std::endl;
 	runConsole(console);

@@ -238,10 +238,7 @@ bool verifyConsole(const Console& console)
 {
 	for(auto& it : console.nodes)
 		if(verifiHelper(it.second)==false)
-		{
-			std::cout<<it.first<<std::endl;
 			return false;
-		}
 	return true;
 }
 
