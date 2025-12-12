@@ -35,6 +35,7 @@ struct Console
 	struct Set
 	{
 		bool newLineAutoComplete = true;
+		int histSize = 10;
 	};
 	Set settings;
 
@@ -105,8 +106,7 @@ void handleEscapeChar(Console& console)
 	}
 	if(seq[1]=='A')
 	{
-		//TODO: check if i actually need this <10 check
-		if(console.histIndex<(int)(console.hist.size()-1))
+		if(console.histIndex<(console.settings.histSize-1)&&console.histIndex<((int)console.hist.size()-1))
 			console.histIndex++;
 	}
 	else if(seq[1]=='B')
@@ -192,11 +192,12 @@ void saveToHist(Console& console)
 	if(console.buf==""||console.buf==console.hist[0])
 		return;
 	
-	if(console.hist.size()<10)
+	if(console.hist.size()<console.settings.histSize)
 		console.hist.push_front(console.buf);
 	else
 	{
-		console.hist.pop_back();
+		while(console.hist.size()>=console.settings.histSize&&console.hist.size()>0)
+			console.hist.pop_back();
 		console.hist.push_front(console.buf);
 	}
 }
