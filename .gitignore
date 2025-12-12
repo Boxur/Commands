@@ -1,2 +1,5 @@
 commands
 build/
+
+#vim predictions file
+.vim.pred
