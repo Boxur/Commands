@@ -106,7 +106,7 @@ void handleEscapeChar(Console& console)
 	if(seq[1]=='A')
 	{
 		//TODO: check if i actually need this <10 check
-		if(console.histIndex<10&&console.histIndex<(int)(console.hist.size()-1))
+		if(console.histIndex<(int)(console.hist.size()-1))
 			console.histIndex++;
 	}
 	else if(seq[1]=='B')
@@ -114,12 +114,11 @@ void handleEscapeChar(Console& console)
 		if(console.histIndex>=0)
 			console.histIndex--;
 	}
-	console.buf.clear();
+	console.buf="";
 	if(arrows&&console.histIndex!=-1)
 	{
 		write(STDIN_FILENO,console.hist[console.histIndex].c_str(),console.hist[console.histIndex].size());
- 		for(char& c : console.hist[console.histIndex])
-			console.buf.push_back(c);
+		console.buf = console.hist[console.histIndex];
 	}
 }
 
@@ -187,8 +186,24 @@ void autoComplete(Console& console)
 	}
 }
 
+void saveToHist(Console& console)
+{
+	console.histIndex=-1;
+	if(console.buf==""||console.buf==console.hist[0])
+		return;
+	
+	if(console.hist.size()<10)
+		console.hist.push_front(console.buf);
+	else
+	{
+		console.hist.pop_back();
+		console.hist.push_front(console.buf);
+	}
+}
+
 void executeCommand(Console& console)
 {
+	saveToHist(console);
 	std::istringstream ss(console.buf);
 	std::vector<std::string> values;
 	std::string value;
@@ -198,9 +213,9 @@ void executeCommand(Console& console)
 			values.push_back(value);
 	}
 	console.buf = "";
+	write(STDIN_FILENO,"\r\n",2);
 	if(values.size()<1)
 		return;
-	write(STDIN_FILENO,"\r\n",2);
 	if(console.nodes.find(values[0])==console.nodes.end())
 	{
 		write(STDIN_FILENO, "Unknown command: \r\n",19);
