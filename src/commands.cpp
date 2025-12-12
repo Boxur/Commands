@@ -12,16 +12,18 @@ int main()
 					std::cout << "pong\n";
         };
 
-    console["set"]["mode"]["automat"].function =
-        [&](const std::vector<std::string>&)
-        {
-					std::cout << "Mode set to AUTO.\n";
-        };
-
-		console["set"]["mode"]["automobile"].function = 
+		console["set"]["newLineAutoComplete"]["1"].function = console["set"]["newLineAutoComplete"]["true"].function =
 				[&](const std::vector<std::string>&)
 				{
-					return;
+					console.settings.newLineAutoComplete = true;
+					std::cout<<"newLineAutoComplete was set to true"<<std::endl;
+				};
+		
+		console["set"]["newLineAutoComplete"]["0"].function = console["set"]["newLineAutoComplete"]["false"].function =
+				[&](const std::vector<std::string>&)
+				{
+					console.settings.newLineAutoComplete = false;
+					std::cout<<"newLineAutoComplete was set to false"<<std::endl;
 				};
 
 		console["exit"].function =
