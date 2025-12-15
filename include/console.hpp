@@ -8,6 +8,7 @@
 #include <optional>
 #include <deque>
 #include <sstream>
+#include <fstream>
 
 struct Node
 {
@@ -317,4 +318,53 @@ void runConsole(Console& console)
 				break;
 	}
 	setRawMode(false);
+}
+
+void runConsole(Console& console,std::string filename)
+{
+	if(!verifyConsole(console))
+	{
+		write(STDIN_FILENO,"invalid console",15);
+		return;
+	}
+	std::ifstream file(filename);
+	if(!file)
+	{
+		write(STDIN_FILENO,"invalid file",12);
+		return;
+	}
+	setRawMode(true);
+	write(STDIN_FILENO,">",1);
+	char c;
+	bool start=true;
+	bool skip=false;
+	while(file.get(c)&&!console.stop)
+	{
+		switch(c)
+		{
+			case ' ':
+				if(!start&&!skip)
+					handleInput(c,console);
+				break;
+			case '\n':
+				if(!start&&!skip)
+					handleInput((char)10,console);
+				start = true;
+				skip=false;
+				break;
+			case '#':
+				skip = true;
+				break;
+			default:
+				start=false;
+				if(!skip)
+					handleInput(c,console);
+				break;
+			
+					
+		}
+	}
+	setRawMode(false);
+	if(!console.stop)
+		runConsole(console);
 }

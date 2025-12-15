@@ -3,7 +3,7 @@
 
 #include "console.hpp"
 
-int main() 
+int main(int argc,char* argv[]) 
 {
 	Console console;
 
@@ -51,6 +51,10 @@ int main()
 		{
 			console.stop = true;
 		};
-	runConsole(console);
+
+	if(argc==1)
+		runConsole(console);
+	else
+		runConsole(console,argv[1]);
 	
 }
