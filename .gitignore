@@ -1,6 +1,5 @@
 commands
-build/
+out/
 
-#vim predictions file
-.vim.pred
 *.sh
+compile_commands.json

@@ -1,11 +1,10 @@
 #include <iostream>
-#include <algorithm>
 
-#include "console.hpp"
+#include "Console.hpp"
 
 int main(int argc,char* argv[]) 
 {
-	Console console;
+  cli::Console console;
 
 	console["ping"].function =
       [&](const std::vector<std::string>&)
@@ -53,8 +52,8 @@ int main(int argc,char* argv[])
 		};
 
 	if(argc==1)
-		runConsole(console);
+    console.Run();
 	else
-		runConsole(console,argv[1]);
+    console.Run(argv[1]);
 	
 }
