@@ -1,5 +1,6 @@
 #include "console.hpp"
 #include <fstream>
+#include <print>
 #include <sstream>
 #include <string>
 
@@ -228,7 +229,45 @@ bool Console::Verify_() {
   return true;
 }
 
+void Console::SetupDefaultCommands_() {
+  (*this)["set"]["newLineAutoComplete"]["1"].function =
+      (*this)["set"]["newLineAutoComplete"]["true"].function =
+          [&](const std::vector<std::string> &) {
+            this->settings.newLineAutoComplete = true;
+            std::println("newLineAutoComplete was set to true");
+          };
+
+  (*this)["set"]["newLineAutoComplete"]["0"].function =
+      (*this)["set"]["newLineAutoComplete"]["false"].function =
+          [&](const std::vector<std::string> &) {
+            this->settings.newLineAutoComplete = false;
+            std::println("newLineAutoComplete was set to false");
+          };
+
+  (*this)["set"]["newLineAutoComplete"]["show"].function =
+      [&](const std::vector<std::string> &) {
+        std::println("newLineAutoComplete is set to {}",
+                     (this->settings.newLineAutoComplete) ? "true" : "false");
+      };
+
+  (*this)["set"]["histSize"].function =
+      [&](const std::vector<std::string> &args) {
+        if (args.size() < 1 ||
+            !all_of(args[0].begin(), args[0].end(), ::isdigit)) {
+          std::println("Usage: set histSize [integer]");
+          return;
+        }
+        this->settings.histSize = stoi(args[0]);
+        std::println("histSize was set to {}", this->settings.histSize);
+      };
+
+  (*this)["exit"].function = [&](const std::vector<std::string> &) {
+    this->stop = true;
+  };
+}
+
 void Console::Run() {
+  SetupDefaultCommands_();
   if (!Verify_()) {
     write(STDIN_FILENO, "invalid console", 15);
     return;
@@ -246,6 +285,7 @@ void Console::Run() {
 }
 
 void Console::Run(std::string filename) {
+  SetupDefaultCommands_();
   if (!Verify_()) {
     write(STDIN_FILENO, "invalid console", 15);
     return;
