@@ -13,7 +13,7 @@ Console::Node &Console::operator[](const std::string &key) {
   return *ret;
 }
 
-void Console::SetRawMode(bool enable) {
+void Console::SetRawMode_(bool enable) {
   static struct termios oldt, newt;
   if (enable) {
     tcgetattr(STDIN_FILENO, &oldt);
@@ -27,14 +27,14 @@ void Console::SetRawMode(bool enable) {
   }
 }
 
-std::optional<char> Console::ReadChar() {
+std::optional<char> Console::ReadChar_() {
   char c;
   if (read(STDIN_FILENO, &c, 1))
     return c;
   return {};
 }
 
-bool Console::Input_available(int fd, int timeout_ms) {
+bool Console::Input_available_(int fd, int timeout_ms) {
   fd_set fds;
   FD_ZERO(&fds);
   FD_SET(fd, &fds);
@@ -42,8 +42,8 @@ bool Console::Input_available(int fd, int timeout_ms) {
   return select(fd + 1, &fds, NULL, NULL, &tv) > 0;
 }
 
-void Console::HandleEscapeChar() {
-  if (!Input_available(STDIN_FILENO, 10)) {
+void Console::HandleEscapeChar_() {
+  if (!Input_available_(STDIN_FILENO, 10)) {
     write(STDIN_FILENO, "\r\n", 2);
     stop = true;
     return;
@@ -74,7 +74,7 @@ void Console::HandleEscapeChar() {
   }
 }
 
-void Console::AutoComplete() {
+void Console::AutoComplete_() {
   std::istringstream ss(buf);
   std::vector<std::string> values;
   std::string value;
@@ -127,7 +127,7 @@ void Console::AutoComplete() {
   }
 }
 
-void Console::SaveToHist() {
+void Console::SaveToHist_() {
   histIndex = -1;
   if (buf == "" || (hist.size() != 0 && buf == hist[0]))
     return;
@@ -141,8 +141,8 @@ void Console::SaveToHist() {
   }
 }
 
-void Console::ExecuteCommand() {
-  SaveToHist();
+void Console::ExecuteCommand_() {
+  SaveToHist_();
   std::istringstream ss(buf);
   std::vector<std::string> values;
   std::string value;
@@ -177,11 +177,11 @@ void Console::ExecuteCommand() {
   node->function(arguments);
 }
 
-int Console::HandleInput(char ch) {
+int Console::HandleInput_(char ch) {
   std::string s;
   switch (ch) {
   case 27:
-    HandleEscapeChar();
+    HandleEscapeChar_();
     break;
   case 8:
   case 127:
@@ -191,10 +191,10 @@ int Console::HandleInput(char ch) {
     }
     break;
   case '\t':
-    AutoComplete();
+    AutoComplete_();
     break;
   case 10:
-    ExecuteCommand();
+    ExecuteCommand_();
     if (!stop)
       write(STDIN_FILENO, ">", 1);
 
@@ -207,7 +207,7 @@ int Console::HandleInput(char ch) {
   return 0;
 }
 
-bool Console::VerifyHelper(const std::shared_ptr<Node> &node) {
+bool Console::VerifyHelper_(const std::shared_ptr<Node> &node) {
   if (node->function != nullptr) {
     if (node->children.size() != 0)
       return false;
@@ -216,37 +216,37 @@ bool Console::VerifyHelper(const std::shared_ptr<Node> &node) {
   if (node->children.size() == 0)
     return false;
   for (auto &it : node->children)
-    if (VerifyHelper(it.second) == false)
+    if (VerifyHelper_(it.second) == false)
       return false;
   return true;
 }
 
-bool Console::Verify() {
+bool Console::Verify_() {
   for (auto &it : nodes)
-    if (VerifyHelper(it.second) == false)
+    if (VerifyHelper_(it.second) == false)
       return false;
   return true;
 }
 
 void Console::Run() {
-  if (!Verify()) {
+  if (!Verify_()) {
     write(STDIN_FILENO, "invalid console", 15);
     return;
   }
-  SetRawMode(true);
+  SetRawMode_(true);
   write(STDIN_FILENO, ">", 1);
   std::optional<char> ch;
   while (!stop) {
-    ch = ReadChar();
+    ch = ReadChar_();
     if (ch.has_value())
-      if (HandleInput(ch.value()) == 1)
+      if (HandleInput_(ch.value()) == 1)
         break;
   }
-  SetRawMode(false);
+  SetRawMode_(false);
 }
 
 void Console::Run(std::string filename) {
-  if (!Verify()) {
+  if (!Verify_()) {
     write(STDIN_FILENO, "invalid console", 15);
     return;
   }
@@ -255,7 +255,7 @@ void Console::Run(std::string filename) {
     write(STDIN_FILENO, "invalid file", 12);
     return;
   }
-  SetRawMode(true);
+  SetRawMode_(true);
   write(STDIN_FILENO, ">", 1);
   char c;
   bool start = true;
@@ -264,11 +264,11 @@ void Console::Run(std::string filename) {
     switch (c) {
     case ' ':
       if (!start && !skip)
-        HandleInput(c);
+        HandleInput_(c);
       break;
     case '\n':
       if (!start && !skip)
-        HandleInput((char)10);
+        HandleInput_((char)10);
       start = true;
       skip = false;
       break;
@@ -278,11 +278,11 @@ void Console::Run(std::string filename) {
     default:
       start = false;
       if (!skip)
-        HandleInput(c);
+        HandleInput_(c);
       break;
     }
   }
-  SetRawMode(false);
+  SetRawMode_(false);
   if (!stop)
     Run();
 }

@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(CMAKE_CXX_EXTENSIONS		OFF)
 
 add_library(cli STATIC
-  src/Console.cpp
+  src/console.cpp
 )
 
 target_include_directories(cli PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
