@@ -13,5 +13,5 @@ add_library(cli STATIC
 
 target_include_directories(cli PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-add_executable(exec src/commands.cpp)
-target_link_libraries(exec cli)
+# add_executable(exec src/commands.cpp)
+# target_link_libraries(exec cli)
