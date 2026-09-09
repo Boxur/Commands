@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "console.hpp"
+#include "cli/console.hpp"
 
 int main(int argc, char *argv[]) {
   cli::Console console;

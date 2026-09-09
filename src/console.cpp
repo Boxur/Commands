@@ -1,4 +1,4 @@
-#include "console.hpp"
+#include "cli/console.hpp"
 #include <fstream>
 #include <print>
 #include <sstream>
