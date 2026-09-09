@@ -6,7 +6,7 @@ executable at runtime.
 [![Build](https://github.com/Boxur/CLI/actions/workflows/documentation.yml/badge.svg)](https://github.com/boxur/CLI/actions)
 [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://cli.documentation.boxur.org/)
 [![License](https://img.shields.io/github/license/boxur/CLI)](LICENSE)
-[![Top Language](https://img.shields.io/github/languages/top/boxur/NeuralNetwork)](https://github.com/boxur/NeuralNetwork)
+[![Top Language](https://img.shields.io/github/languages/top/boxur/CLI)](https://github.com/boxur/CLI)
 
 ## Features
 
