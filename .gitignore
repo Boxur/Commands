@@ -1,5 +1,5 @@
 commands
 out/
-
+docs/html
 *.sh
 compile_commands.json

@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <deque>
 #include <functional>
 #include <memory>
@@ -10,12 +11,42 @@
 
 namespace cli {
 
+/**
+ *  @brief Console represents the customisable console.
+ *
+ *  Console sets up raw mode for the console,
+ *  manages settings, autocomplete when typing commands,
+ *  and executing stored commands.
+ */
 class Console {
-private:
-  struct Node {
+public:
+  class Node {
+    friend class Console;
+
+  private:
     std::unordered_map<std::string, std::shared_ptr<Node>> children;
+
+  public:
+    /**
+     * @brief A function to call when executing a command
+     */
     std::function<void(const std::vector<std::string> &)> function = nullptr;
 
+  public:
+    /**
+     *  @brief Used to add a new command.
+     *
+     *  Can be chained togehter to add more complex commands.
+     *
+     *  ```cpp
+     *  Console console;
+     *
+     *  //create a command "command set histSize";
+     *  console["console"]["set"]["histSize"].function = [](){};
+     *  ```
+     *
+     *  @param key Command name
+     */
     Console::Node &operator[](const std::string &key) {
       std::shared_ptr<Node> &ret = children[key];
       if (!ret)
@@ -24,26 +55,76 @@ private:
     }
   };
 
-  struct Set {
-    bool newLineAutoComplete = true;
-    int histSize = 10;
-  };
-
-public:
-  std::unordered_map<std::string, std::shared_ptr<Node>> nodes;
+  /**
+   * @brief Manages if the main loop should stop.
+   *
+   * Set to true if you want to stop the console from running.
+   */
   bool stop = false;
-  Set settings;
+  /**
+   * @brief Console settings
+   */
+  struct {
+    /**
+     * @brief Sets the style of autocomplete.
+     *
+     * When true creates a new line when autocompleating Cisco-style.
+     * When false keeps the autocomplete in the same line like in a terminal.
+     */
+    bool newLineAutoComplete = true;
+    /**
+     * @brief Sets the size of history.
+     *
+     * History can be accessed with Up/Down arrow keys.
+     */
+    int histSize = 10;
+  } settings;
 
 private:
+  std::unordered_map<std::string, std::shared_ptr<Node>> nodes;
   std::string buf = "";
   std::deque<std::string> hist;
   int histIndex = -1;
 
 public:
+  /**
+   *  @brief Used to add a new command.
+   *
+   *  Can be chained togehter with Console::Node::operator[] to
+   *  add more complex commands.
+   *
+   *  ```cpp
+   *  Console console;
+   *
+   *  //create a command "command set histSize";
+   *  console["console"]["set"]["histSize"].function = [](){};
+   *  ```
+   *
+   *  @param key Command name
+   */
   Node &operator[](const std::string &key);
 
+  /**
+   * @brief Starts the custom console.
+   *
+   * Sets up raw mode for custom key functionality and begins the main loop.\
+   */
   void Run();
 
+  /**
+   * @brief Starts the custom console and executes commands from a file.
+   *
+   * Like Run() but also executes commands from a file.
+   * Useful when a script file is wanted.
+   *
+   * ```cpp
+   * if (argc == 1)
+   *   console.Run();
+   * else
+   *   console.Run(argv[1]);
+   *
+   * ```
+   */
   void Run(std::string filename);
 
 private:
